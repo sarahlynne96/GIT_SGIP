@@ -61,7 +61,19 @@
         <div class="field"><button type="button" id="btnCheck">Calculate Incentive</button></div>
       </form>
     </aside>
-    <section class="content"><div id="result" class="result" style="display:none;"></div></section>
+    <section class="content">
+      <!-- Embedded ArcGIS Maps -->
+      <div class="map-container" style="height: 250px; margin-bottom: 10px;">
+        <h2 style="margin:0; padding:8px; background:var(--navy); color:#fff; font-size:0.9rem;">Disadvantaged Community (SB 535)</h2>
+        <iframe src="https://experience.arcgis.com/experience/1c21c53da8de48f1b946f3402fbae55c/page/SB-535-Disadvantaged-Communities/" title="DAC Map"></iframe>
+      </div>
+      <div class="map-container" style="height: 250px; margin-bottom: 10px;">
+        <h2 style="margin:0; padding:8px; background:var(--navy); color:#fff; font-size:0.9rem;">Tier 2/3 Wildfire Threat Zone</h2>
+        <iframe src="https://capuc.maps.arcgis.com/apps/webappviewer/index.html?id=5bdb921d747a46929d9f00dbdb6d0fa2" title="Wildfire Threat Map"></iframe>
+      </div>
+      <!-- Results -->
+      <div id="result" class="result" style="display:none;"></div>
+    </section>
   </div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="https://unpkg.com/esri-leaflet@3.0.3/dist/esri-leaflet.js"></script>
@@ -103,4 +115,3 @@
   </script>
 </body>
 </html>
-
