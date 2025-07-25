@@ -4,35 +4,39 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SGIP Eligibility & Incentive Calculator</title>
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <style>
-    /* Aurora-like modern UI */
+    /* SGIP Branding Colors */
     :root {
-      --primary-bg: #ffffff;
-      --secondary-bg: #f7f9fb;
-      --accent: #4a90e2;
-      --text-primary: #2a2a2a;
-      --text-secondary: #555555;
-      --border-radius: 8px;
+      --sgip-blue: #003C71;
+      --sgip-gold: #F2C94C;
+      --bg-light: #F9F9F9;
+      --text-dark: #2A2A2A;
+      --text-light: #555555;
+      --radius: 8px;
       --shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: 'Inter', sans-serif;
-      background: var(--secondary-bg);
-      color: var(--text-primary);
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg-light);
+      color: var(--text-dark);
       line-height: 1.6;
     }
     header {
-      background: var(--accent);
+      background: var(--sgip-blue);
       color: white;
-      padding: 1rem 2rem;
+      padding: 1rem;
       text-align: center;
       box-shadow: var(--shadow);
     }
     header h1 { margin: 0; font-size: 1.6rem; }
+    header nav a {
+      color: var(--sgip-gold);
+      margin-left: 1rem;
+      text-decoration: none;
+      font-weight: bold;
+    }
     .main {
       display: flex;
       flex-wrap: wrap;
@@ -40,161 +44,168 @@
       gap: 1rem;
     }
     .form-panel, .map-panel {
-      background: var(--primary-bg);
-      border-radius: var(--border-radius);
+      background: white;
+      border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: 1.5rem;
     }
-    .form-panel { flex: 1 1 320px; }
-    .map-panel { flex: 2 1 640px; }
+    .form-panel { flex: 1 1 300px; max-width: 350px; }
+    .map-panel { flex: 2 1 600px; }
     form .field { margin-bottom: 1rem; }
     form label {
       display: block;
       margin-bottom: 0.5rem;
       font-weight: 600;
-      color: var(--text-primary);
     }
-    form input, form select {
+    form select, form input {
       width: 100%;
       padding: 0.75rem;
-      border: 1px solid #d1dce5;
-      border-radius: var(--border-radius);
+      border: 1px solid #ccc;
+      border-radius: var(--radius);
       font-size: 1rem;
-      color: var(--text-primary);
-      background: var(--secondary-bg);
-      transition: border-color 0.2s;
-    }
-    form input:focus, form select:focus {
-      border-color: var(--accent);
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(74,144,226,0.2);
+      background: var(--bg-light);
     }
     form button {
       width: 100%;
       padding: 0.75rem;
-      background: var(--accent);
-      color: white;
+      background: var(--sgip-gold);
+      color: var(--sgip-blue);
       border: none;
-      border-radius: var(--border-radius);
+      border-radius: var(--radius);
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
+      box-shadow: var(--shadow);
       transition: background 0.3s;
     }
-    form button:disabled {
-      background: #a0c4f2;
-      cursor: not-allowed;
-    }
-    form button:hover:not(:disabled) {
-      background: #357ab8;
-    }
-    #zoneMap {
-      width: 100%;
-      height: 240px;
-      border-radius: var(--border-radius);
-      overflow: hidden;
-      margin-bottom: 1rem;
-    }
+    form button:hover { background: #e0b43a; }
     .arcgis-maps {
       display: flex;
+      flex-direction: column;
       gap: 1rem;
-      flex-wrap: wrap;
     }
     .arcgis {
-      flex: 1 1 48%;
-      border-radius: var(--border-radius);
+      border-radius: var(--radius);
       overflow: hidden;
       box-shadow: var(--shadow);
-      background: var(--primary-bg);
     }
     .arcgis h2 {
       margin: 0;
       padding: 0.75rem;
-      background: var(--accent);
+      background: var(--sgip-blue);
       color: white;
       font-size: 1rem;
       font-weight: 600;
     }
     .arcgis iframe {
       width: 100%;
-      height: 180px;
+      height: 300px;
       border: none;
     }
-    .result {
-      background: var(--primary-bg);
-      border-left: 4px solid var(--accent);
+    .guide {
+      margin-top: 2rem;
+      background: var(--bg-light);
       padding: 1rem;
-      border-radius: var(--border-radius);
+      border-radius: var(--radius);
       box-shadow: var(--shadow);
-      margin-top: 1rem;
     }
-    .result h2 { margin-top: 0; font-size: 1.2rem; color: var(--accent); }
-    .spinner {
-      display: none;
-      position: absolute;
-      top: calc(50% - 30px);
-      left: calc(50% - 30px);
-      width: 60px;
-      height: 60px;
-      border: 8px solid #f3f3f3;
-      border-top: 8px solid var(--accent);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      z-index: 1000;
+    .guide h2 {
+      margin-top: 0;
+      color: var(--sgip-blue);
+      font-size: 1.25rem;
     }
-    @keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
+    .guide ul {
+      padding-left: 1.25rem;
+    }
     @media (max-width: 768px) {
       .main { flex-direction: column; }
-      .arcgis { flex: 1 1 100%; }
+      .map-panel { order: -1; }
     }
   </style>
 </head>
 <body>
   <header>
     <h1>SGIP Eligibility & Incentive Calculator</h1>
+    <nav><a href="sgip-guides.html">SGIP Guides</a></nav>
   </header>
   <div class="main">
-    <aside class="form-panel">
-      <div id="spinner" class="spinner"></div>
-      <form id="calcForm">
-        <div class="field">
-          <label for="zip">ZIP / City</label>
-          <input type="text" id="zip" placeholder="90210 or Los Angeles, CA" aria-label="ZIP or City" />
-        </div>
-        <div id="zoneMap"></div>
-        <div class="field"><label for="customerType">Host Customer Class</label><select id="customerType"><option value="">Select...</option><option value="residential-single">Residential Single-Family</option><option value="residential-multi">Residential Multifamily</option><option value="commercial">Commercial/Business</option><option value="industrial">Industrial/Agricultural</option></select></div>
-        <div class="field"><label for="inDAC">Disadvantaged Community?</label><select id="inDAC"><option value=""></option><option value="yes">Yes</option><option value="no">No</option></select></div>
-        <div class="field"><label for="inFire">Tier 2/3 Wildfire Threat Zone?</label><select id="inFire"><option value=""></option><option value="yes">Yes</option><option value="no">No</option></select></div>
-        <div class="field"><label for="capacity">Storage Capacity (kWh)</label><input type="number" id="capacity" min="0" placeholder="e.g., 30" aria-label="Storage Capacity" /></div>
-        <div class="field"><label for="solarCapacity">Solar PV Capacity (kW)</label><input type="number" id="solarCapacity" min="0" step="0.1" placeholder="e.g., 5" aria-label="Solar PV Capacity" /></div>
-        <div class="field"><button type="button" id="btnCheck" disabled>Calculate Incentive</button></div>
-      </form>
-    </aside>
     <section class="map-panel">
       <div class="arcgis-maps">
-        <div class="arcgis"><h2>SB 535 Disadvantaged Communities</h2><iframe src="https://experience.arcgis.com/experience/1c21c53da8de48f1b946f3402fbae55c/page/SB-535-Disadvantaged-Communities/" title="DAC"></iframe></div>
-        <div class="arcgis"><h2>Tier 2/3 Wildfire Threat</h2><iframe src="https://capuc.maps.arcgis.com/apps/webappviewer/index.html?id=5bdb921d747a46929d9f00dbdb6d0fa2" title="Wildfire"></iframe></div>
+        <div class="arcgis">
+          <h2>SB 535 Disadvantaged Communities</h2>
+          <iframe src="https://experience.arcgis.com/experience/1c21c53da8de48f1b946f3402fbae55c/page/SB-535-Disadvantaged-Communities/" title="DAC Map"></iframe>
+        </div>
+        <div class="arcgis">
+          <h2>Tier 2/3 Wildfire Threat Zone</h2>
+          <iframe src="https://capuc.maps.arcgis.com/apps/webappviewer/index.html?id=5bdb921d747a46929d9f00dbdb6d0fa2" title="Wildfire Threat Map"></iframe>
+        </div>
+      </div>
+    </section>
+    <aside class="form-panel">
+      <form id="calcForm">
+        <div class="field">
+          <label for="customerType">Host Customer Class</label>
+          <select id="customerType">
+            <option value="">Select...</option>
+            <option value="residential-single">Residential Single-Family</option>
+            <option value="residential-multi">Residential Multifamily</option>
+            <option value="commercial">Commercial/Business</option>
+            <option value="industrial">Industrial/Agricultural</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="inDAC">Disadvantaged Community?</label>
+          <select id="inDAC"><option value="yes">Yes</option><option value="no">No</option></select>
+        </div>
+        <div class="field">
+          <label for="inFire">Tier 2/3 Wildfire Threat Zone?</label>
+          <select id="inFire"><option value="yes">Yes</option><option value="no">No</option></select>
+        </div>
+        <div class="field">
+          <label for="capacity">Storage Capacity (kWh)</label>
+          <input type="number" id="capacity" min="0" placeholder="e.g., 30" />
+        </div>
+        <div class="field">
+          <label for="solarCapacity">Solar PV Capacity (kW)</label>
+          <input type="number" id="solarCapacity" min="0" step="0.1" placeholder="e.g., 5" />
+        </div>
+        <div class="field">
+          <button type="button" id="btnCheck">Calculate Incentive</button>
+        </div>
+      </form>
+      <div class="guide">
+        <h2>SGIP Program Guide</h2>
+        <ul>
+          <li><strong>General Market Storage:</strong> Base incentives for storage; for customers not in equity budgets.</li>
+          <li><strong>Small Residential Storage:</strong> Capped at 30 kWh, same step rates as general market.</li>
+          <li><strong>Residential Solar & Storage Equity:</strong> Enhanced rates for low-income DAC customers and equity participants.</li>
+          <li><strong>Equity Resiliency:</strong> Added incentives for systems in wildfire threat zones or PSPS-impacted areas.</li>
+          <li><strong>San Joaquin Valley:</strong> Pilot incentives for eligible SJV communities.</li>
+          <li><strong>Generation (AB 209 Solar):</strong> Incentives per kW for solar PV installations.</li>
+        </ul>
       </div>
       <div id="result" class="result" style="display:none;"></div>
-    </section>
+    </aside>
   </div>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="https://unpkg.com/esri-leaflet@3.0.3/dist/esri-leaflet.js"></script>
   <script>
     const rates={general:0.25,smallRes:0.15,equity:1.10,resiliency:1.00,sjv:1.10,solar:3.10,generation:2.00};
-    const map=L.map('zoneMap').setView([34,-118],8);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    let marker;
-    const dacLayer=L.esri.featureLayer({url:'https://services.arcgis.com/jIL9msH9KiTzpLmm/ArcGIS/rest/services/CE_Boundaries_SB535/FeatureServer/0'}).addTo(map);
-    const fireLayer=L.esri.featureLayer({url:'https://services.arcgis.com/T4QMspbfLg3qTGWY/ArcGIS/rest/services/CPUC_Fire_HFDT_2_3/FeatureServer/0'}).addTo(map);
-    const legend=L.control({position:'topright'});
-    legend.onAdd=()=>{const div=L.DomUtil.create('div','legend');div.style.background='white';div.style.padding='8px';div.style.borderRadius='4px';div.innerHTML=`<label><input type='checkbox' id='toggleDAC' checked> Disadvantaged Community</label><br><label><input type='checkbox' id='toggleFire' checked> Wildfire Threat Zone</label>`;return div;};
-    legend.addTo(map);
-    document.addEventListener('change',e=>{if(e.target.id==='toggleDAC')e.target.checked?map.addLayer(dacLayer):map.removeLayer(dacLayer);if(e.target.id==='toggleFire')e.target.checked?map.addLayer(fireLayer):map.removeLayer(fireLayer);});
-    async function geocode(q){const r=await fetch(`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&SingleLine=${encodeURIComponent(q)}`);const j=await r.json();if(j.candidates.length) return j.candidates[0].location;throw'Not found';}
-    const spinner=document.getElementById('spinner');document.getElementById('zip').addEventListener('blur',async()=>{const zipInput=document.getElementById('zip');if(!zipInput.value.trim())return;spinner.style.display='block';try{const loc=await geocode(zipInput.value);const ll=[loc.y,loc.x];map.setView(ll,12);marker?marker.setLatLng(ll):(marker=L.marker(ll).addTo(map));const dac=await new Promise(r=>dacLayer.query().intersects(L.latLng(ll)).run((e,f)=>r(f.features.length>0)));const fire=await new Promise(r=>fireLayer.query().intersects(L.latLng(ll)).run((e,f)=>r(f.features.length>0)));document.getElementById('inDAC').value=dac?'yes':'no';document.getElementById('inFire').value=fire?'yes':'no';}catch(e){console.warn(e);}finally{spinner.style.display='none';}});
-    const btn=document.getElementById('btnCheck');function updateButtonState(){const zipVal=document.getElementById('zip').value.trim();const capVal=document.getElementById('capacity').value.trim();btn.disabled=!(zipVal&&capVal);}document.getElementById('zip').addEventListener('input',updateButtonState);document.getElementById('capacity').addEventListener('input',updateButtonState);
-    document.getElementById('btnCheck').addEventListener('click',()=>{btn.disabled=true;spinner.style.display='block';const cap=parseFloat(document.getElementById('capacity').value)||0;const sol=parseFloat(document.getElementById('solarCapacity').value)||0;const arr=[];arr.push(`General Market: $${(cap*1000*rates.general).toLocaleString()}`);arr.push(`Small Res: $${(cap*1000*rates.smallRes).toLocaleString()}`);arr.push(`Equity: $${(cap*1000*rates.equity).toLocaleString()}`);arr.push(`Resiliency: $${(cap*1000*rates.resiliency).toLocaleString()}`);arr.push(`SJV: $${(cap*1000*rates.sjv).toLocaleString()}`);arr.push(`Solar AB209: $${(sol*1000*rates.solar).toLocaleString()}`);arr.push(`Generation: $${(sol*1000*rates.generation).toLocaleString()}`);const rdiv=document.getElementById('result');rdiv.innerHTML=`<h2>Incentive Breakdown</h2><ul>${arr.map(i=>`<li>${i}</li>`).join('')}</ul>`;rdiv.style.display='block';spinner.style.display='none';btn.disabled=false;});
+    document.getElementById('btnCheck').addEventListener('click',()=>{
+      const cap=parseFloat(document.getElementById('capacity').value)||0;
+      const sol=parseFloat(document.getElementById('solarCapacity').value)||0;
+      const inDAC=document.getElementById('inDAC').value==='yes';
+      const inFire=document.getElementById('inFire').value==='yes';
+      const breakdown=[];
+      breakdown.push(`General Market: $${(cap*1000*rates.general).toLocaleString()}`);
+      breakdown.push(`Small Residential: $${(cap*1000*rates.smallRes).toLocaleString()}`);
+      if(inDAC) breakdown.push(`Equity Storage: $${(cap*1000*rates.equity).toLocaleString()}`);
+      if(inFire) breakdown.push(`Equity Resiliency: $${(cap*1000*rates.resiliency).toLocaleString()}`);
+      breakdown.push(`San Joaquin Valley: $${(cap*1000*rates.sjv).toLocaleString()}`);
+      breakdown.push(`AB209 Solar: $${(sol*1000*rates.solar).toLocaleString()}`);
+      breakdown.push(`Generation: $${(sol*1000*rates.generation).toLocaleString()}`);
+      const res=document.getElementById('result');
+      res.innerHTML=`<h2>Incentive Breakdown</h2><ul>${breakdown.map(i=>`<li>${i}</li>`).join('')}</ul>`;
+      res.style.display='block';
+    });
   </script>
 </body>
 </html>
