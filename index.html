@@ -1,86 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SGIP Eligibility & Incentive Calculator</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_API_KEY&libraries=places"></script>
-  <script type="module" src="script.js" defer></script>
+  <style>
+    :root {
+      --primary: #fdb813;
+      --secondary: #003c71;
+      --accent: #005eb8;
+      --bg: #f9f9f9;
+      --text: #333;
+      --muted: #555;
+    }
+    body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: Arial, sans-serif; }
+    h1 { color: var(--primary); text-align: center; margin: 20px 0; font-size: 1.8rem; }
+    .container { display: flex; flex-wrap: wrap; max-width: 1200px; margin: 0 auto; padding: 10px; gap: 20px; }
+    .maps, .calculator { flex: 1 1 100%; }
+    @media (min-width: 768px) { .maps { flex: 1 1 60%; } .calculator { flex: 1 1 38%; } }
+    .map-container { border: 1px solid var(--accent); border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
+    .map-container h2 { margin: 0; padding: 10px; background: var(--secondary); color: white; font-size: 1rem; }
+    .map-container iframe { width: 100%; height: 400px; border: 0; }
+    form > div { margin-bottom: 15px; }
+    label { display: block; font-weight: bold; color: var(--secondary); margin-bottom: 5px; font-size: 1rem; }
+    select, input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1rem; }
+    button { background: var(--primary); color: white; border: none; padding: 12px 20px; font-size: 1rem; border-radius: 4px; cursor: pointer; transition: background 0.3s; }
+    button:hover { background: var(--accent); }
+    .result { margin-top: 20px; padding: 15px; background: white; border-left: 5px solid var(--primary); border-radius: 4px; font-size: 1rem; line-height: 1.4; }
+    small { color: var(--muted); font-size: 0.875rem; }
+    @media (max-width: 767px) {
+      .container { flex-direction: column; padding: 5px; gap: 10px; }
+      h1 { font-size: 1.5rem; margin: 10px 0; }
+      .map-container iframe { height: 250px; }
+      .map-container h2 { font-size: 0.9rem; padding: 8px; }
+      label { font-size: 0.9rem; }
+      select, input { font-size: 0.95rem; padding: 8px; }
+      button { width: 100%; font-size: 1rem; padding: 12px; }
+    }
+  </style>
 </head>
 <body>
-  <h1>Self-Generation Incentive Program (SGIP)</h1>
-  <p style="text-align:center; max-width: 700px; margin: 0 auto; font-size: 1rem;">
-    SGIP offers <strong>up to $1,100/kWh</strong> for storage and <strong>$3,100/kW</strong> for solar, covering 100% of system cost for qualifying low-income homes. Start here to check your eligibility.
-  </p>
-
+  <h1>SGIP Eligibility & Incentive Calculator</h1>
   <div class="container">
+    <div class="maps">
+      <div class="map-container"><h2>SB 535 Disadvantaged Communities Map</h2><iframe src="https://experience.arcgis.com/experience/1c21c53da8de48f1b946f3402fbae55c/page/SB-535-Disadvantaged-Communities/" title="DAC Map"></iframe></div>
+      <div class="map-container"><h2>Community Air Protection (CAP UC) Map</h2><iframe src="https://capuc.maps.arcgis.com/apps/webappviewer/index.html?id=5bdb921d747a46929d9f00dbdb6d0fa2" title="CAP UC Map"></iframe></div>
+      <div class="map-container"><h2>SCE Shutoff (Outage Status) Tool</h2><p style="padding:10px;"><a href="https://www.sce.com/outages-safety/outage-center/check-outage-status" target="_blank" style="color:var(--accent); text-decoration:none; font-weight:bold;">🔗 Check Public Safety Shutoff Status</a></p></div>
+    </div>
     <div class="calculator">
       <form id="calcForm">
-        <!-- Address Lookup -->
-        <div>
-          <label for="address">Enter Your Address</label>
-          <input type="text" id="address" placeholder="123 Main St, City, CA" />
-          <small id="map-status">Checking location for DAC and Fire Threat status...</small>
-        </div>
-
-        <div>
-          <label for="customerType">1. Host Customer Class</label>
-          <select id="customerType">
-            <option value="">Select type</option>
-            <option value="residential-single">Residential Single-Family</option>
-            <option value="residential-multi">Residential Multifamily</option>
-            <option value="commercial">Commercial/Business</option>
-            <option value="industrial">Industrial/Agricultural</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="programs">2. Qualifying Program Participation</label>
-          <select id="programs">
-            <option value="">Select one</option>
-            <option value="care">CARE/FERA/ESA</option>
-            <option value="sash">SASH / DAC-SASH</option>
-            <option value="income">80% AMI (HUD Verified)</option>
-            <option value="mash">MASH / SOMAH (Multifamily)</option>
-            <option value="none">None</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="capacity">3. Storage Capacity (kWh)</label>
-          <input type="number" id="capacity" min="0" value="30.6" placeholder="Default 30.6 kWh (3 batteries)" />
-        </div>
-
-        <div>
-          <label for="solarCapacity">4. Solar PV Capacity (kW)</label>
-          <input type="number" id="solarCapacity" min="0" step="0.1" placeholder="Leave blank to auto-estimate from square footage" />
-        </div>
-
-        <div>
-          <label for="squareFootage">5. Home Square Footage</label>
-          <input type="number" id="squareFootage" min="0" placeholder="e.g., 2000" />
-        </div>
-
-        <div>
-          <label for="utility">6. Utility Provider</label>
-          <select id="utility">
-            <option value="">Select</option>
-            <option value="sce">SCE</option>
-            <option value="pge">PG&E</option>
-            <option value="scg">SoCalGas</option>
-            <option value="cse">CSE</option>
-            <option value="ladwp">LADWP</option>
-          </select>
-        </div>
-
-        <div>
-          <button type="button" id="btnCheck">Calculate Eligibility & Incentive</button>
-        </div>
+        <div><label for="zip">ZIP Code</label><input type="text" id="zip" placeholder="e.g., 90210"><small>Enter your ZIP to auto-detect zones.</small></div>
+        <div><label for="customerType">Host Customer Class</label><select id="customerType"><option value="">Select type</option><option value="residential-single">Single-Family</option><option value="residential-multi">Multifamily</option><option value="commercial">Commercial</option><option value="industrial">Industrial</option></select></div>
+        <div><label for="inDAC">Disadvantaged Community (DAC)?</label><select id="inDAC"><option value=""></option><option value="yes">Yes</option><option value="no">No</option></select></div>
+        <div><label for="inFire">Tier 2/3 Wildfire Threat Zone?</label><select id="inFire"><option value=""></option><option value="yes">Yes</option><option value="no">No</option></select></div>
+        <div><label for="inPSPS">Located in a PSPS Shutoff Area?</label><select id="inPSPS"><option value=""></option><option value="yes">Yes</option><option value="no">No</option></select></div>
+        <div><label for="equityPathway1">Multifamily Equity Pathway</label><select id="equityPathway1"><option value=""></option><option value="deed">Deed-restricted low-income (≥5 units)</option><option value="80pct">≥80% ≤60% AMI</option><option value="mash">Reserved MASH/SOMAH funds</option></select></div>
+        <div><label for="singleEquity">Single-Family Equity Criterion</label><select id="singleEquity"><option value=""></option><option value="income">Income verified per HUD</option><option value="program">SASH/DAC-SASH/CARE/FERA/ESA</option></select></div>
+        <div><label for="care">CARE Program Participation</label><select id="care"><option value=""></option><option value="yes">Yes</option><option value="no">No</option><option value="unsure">Unsure</option></select></div>
+        <div><label for="helpEnroll">Help enrolling in CARE?</label><select id="helpEnroll"><option value=""></option><option value="yes">Yes</option><option value="no">No</option></select></div>
+        <div><label for="capacity">Storage Capacity (kWh)</label><input type="number" id="capacity" min="0" placeholder="e.g., 30"></div>
+        <div><label for="solarCapacity">Solar PV Capacity (kW)</label><input type="number" id="solarCapacity" min="0" step="0.1" placeholder="e.g., 5"></div>
+        <div><label for="backup">Backup Capability?</label><select id="backup"><option value=""></option><option value="yes">Yes</option><option value="no">No</option></select></div>
+        <div><button type="button" id="btnCheck">Calculate Eligibility & Incentive</button></div>
       </form>
-
       <div id="result" class="result" style="display:none;"></div>
     </div>
   </div>
+  <script>
+    const geocode = async zip => {
+      const resp = await fetch(`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?SingleLine=${zip}&f=pjson`);
+      const data = await resp.json();
+      if(data.candidates && data.candidates.length) {
+        return data.candidates[0].location;
+      }
+      throw new Error('ZIP not found');
+    };
+    const checkZone = async (lat, lon, url) => {
+      const query = `${url}?geometry=${lon},${lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=OBJECTID&f=json`;
+      const resp = await fetch(query);
+      const data = await resp.json();
+      return data.features && data.features.length > 0;
+    };
+    document.getElementById('zip').addEventListener('blur', async () => {
+      const zip = document.getElementById('zip').value;
+      try {
+        const {y: latitude, x: longitude} = await geocode(zip);
+        // CalEnviroScreen SB 535
+        const dacService = 'https://services.arcgis.com/jIL9msH9KiTzpLmm/ArcGIS/rest/services/CE_Boundaries_SB535/FeatureServer/0/query';
+        const inDAC = await checkZone(latitude, longitude, dacService);
+        document.getElementById('inDAC').value = inDAC ? 'yes' : 'no';
+        // Fire Threat Zones (Tier 2/3)
+        const fireService = 'https://services.arcgis.com/T4QMspbfLg3qTGWY/ArcGIS/rest/services/CPUC_Fire_HFDT_2_3/FeatureServer/0/query';
+        const inFire = await checkZone(latitude, longitude, fireService);
+        document.getElementById('inFire').value = inFire ? 'yes' : 'no';
+      } catch(e) {
+        console.warn(e);
+      }
+    });
+    document.getElementById('btnCheck').addEventListener('click', () => {
+      const cust = document.getElementById('customerType').value;
+      const inFire = document.getElementById('inFire').value==='yes';
+      const inPSPS = document.getElementById('inPSPS').value==='yes';
+      const multiPath = document.getElementById('equityPathway1').value;
+      const singlePath = document.getElementById('singleEquity').value;
+      const care = document.getElementById('care').value==='yes';
+      const helpEnroll = document.getElementById('helpEnroll').value==='yes';
+      const capacity = parseFloat(document.getElementById('capacity').value)||0;
+      const solarCap = parseFloat(document.getElementById('solarCapacity').value)||0;
+      let rate=0,budget='';
+      if((cust==='residential-multi'&&multiPath)||(cust==='residential-single'&&singlePath)){
+        budget='Equity Storage';rate=equityRate;
+      } else if(inFire||inPSPS){
+        budget='Equity Resiliency Storage';rate=resiliencyEqRate;
+      } else {
+        budget='General Market Storage';const step=Math.min(Math.floor(capacity/30),generalRates.length-1);rate=generalRates[step];if(inFire||inPSPS)rate+=resiliencyAdder;
+      }
+      const storageIncentive=capacity*1000*rate;
+      const solarIncentive=solarCap*solarRate;
+      const total=storageIncentive+solarIncentive;
+      let text=`You qualify under the **${budget}** category at $${rate.toFixed(2)}/Wh, giving $${storageIncentive.toLocaleString()} for ${capacity} kWh storage.`;
+      if(solarCap>0)text+=` ${solarCap} kW PV earns $${solarIncentive.toLocaleString()}.`;
+      if(care)text+=` CARE saves 20% on your bill.`;
+      if(helpEnroll)text+=` We can help enroll you.`;
+      text+=` Total SGIP incentives: $${total.toLocaleString()}.`;
+      const res=document.getElementById('result');res.innerHTML=`<p>${text}</p>`;res.style.display='block';
+    });
+  </script>
 </body>
 </html>
